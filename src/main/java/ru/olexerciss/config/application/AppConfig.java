@@ -6,9 +6,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import ru.olexerciss.dao.FeatureCoordDao;
 import ru.olexerciss.dao.FeatureLonLatDao;
+import ru.olexerciss.dao.FeatureThreadDao;
+import ru.olexerciss.dao.impl.FeatureCoordDaoImpl;
 import ru.olexerciss.dao.impl.FeatureLonLatDaoImpl;
+import ru.olexerciss.dao.impl.FeatureThreadDaoImpl;
+import ru.olexerciss.entity.FeatureCoord;
 import ru.olexerciss.entity.FeatureLonLat;
+import ru.olexerciss.entity.FeatureThread;
 
 @Configuration
 @PropertySource(value = "classpath:util.properties")
@@ -30,5 +36,15 @@ public class AppConfig {
     @Bean
     public FeatureLonLatDao featureLonLatDao(){
         return new FeatureLonLatDaoImpl(FeatureLonLat.class);
+    }
+
+    @Bean
+    public FeatureCoordDao featureCoordDao(){
+        return new FeatureCoordDaoImpl(FeatureCoord.class);
+    }
+
+    @Bean
+    public FeatureThreadDao featureThreadDao(){
+        return new FeatureThreadDaoImpl(FeatureThread.class);
     }
 }
