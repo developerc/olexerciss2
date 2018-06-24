@@ -73,6 +73,7 @@
     var typeSelect = document.getElementById('type');
     var draw; // global so we can remove it later
     function addInteraction() {
+        var arrCoords = [];
         draw = new ol.interaction.Draw({
             source: source,
             type: typeSelect.value
@@ -84,27 +85,19 @@
                 var parser = new ol.format.GeoJSON();
                 var features = source.getFeatures();
                 var featuresGeoJSON = parser.writeFeatures(features);
-                /*$.ajax({
-                    url: '/features.geojson',
-                    type: 'POST',
-                    data: featuresGeoJSON
-                }).then(function(response) {
-                    console.log(response);
-                });*/
-                console.log('modifyend:');
 
+                console.log('modifyend:');
+                console.log(featuresGeoJSON);
                 // console.log(evt.feature.getGeometry().getCoordinates(), evt.feature.getProperties());
                 // console.log(evt.feature.getProperties());
-                console.log(featuresGeoJSON);
             }, this);
-
         draw.on('drawend',
             function(evt) {
                 evt.feature.setProperties({
                     'id' : nextid,
                     'name':'myCable2'
                 });
-                nextid++;
+
                 // console.log(evt.feature);
                 var parser = new ol.format.GeoJSON();
                 var features = source.getFeatures();
@@ -112,24 +105,62 @@
                 console.log('drawend:');
                 console.log(featuresGeoJSON);
                 console.log(evt.feature.getGeometry().getCoordinates(), evt.feature.getProperties());
-                /*$.ajax({
-                    url: '/features.geojson',
-                    type: 'POST',
-                    data: featuresGeoJSON
-                }).then(function(response) {
-                    console.log(response);
-                });*/
+
+                arrCoords = evt.feature.getGeometry().getCoordinates();
+                saveCoordsLineStr(arrCoords, nextid);
+                /*arrCoords = evt.feature.getGeometry().getCoordinates();
+                var lengthCoords;
+                //получаем массив координат мультилинии
+                lengthCoords = arrCoords.length;
+                console.log('lengthCoords='+lengthCoords);*/
+
+                nextid++;
             },
             this);
     }
-
     typeSelect.onchange = function(e) {
         map.removeInteraction(draw);
         addInteraction();
     };
-
     addInteraction();
 
+    var saveCoordsLineStr = function (arrCoords, nextid) {
+        //формируем JSON для отправки на сервер
+        //получаем массив координат вершин
+        // var arrCoords = evt.feature.getGeometry().getCoordinates();
+        var arrGeometryCoord = [];
+        for (i in arrCoords) {
+            var vertexCoords = arrCoords[i];
+            var objFeatureLonLat = {
+                'longitude':vertexCoords[0],
+                'latitude':vertexCoords[1],
+                'propertyId':nextid
+            };
+            //получили массив координат вершин
+            arrGeometryCoord.push(objFeatureLonLat);
+        }
+
+        var JSONfeatureCoord = {
+            'geometryType':'LineString',
+            'propertyId':nextid,
+            'propertyName':'Cable1',
+            'geometryCoord':arrGeometryCoord
+        };
+        $.ajax({
+            type: 'POST',
+            url: "http://localhost:8080/featurecoord/add",
+            contentType: 'application/json;charset=utf-8',
+            data: JSON.stringify(JSONfeatureCoord),
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                console.log('Success add FeatureCoord');
+            },
+            error: function (jqXHR, testStatus, errorThrown) {
+                console.log('Failed add FeatureCoord');
+            }
+        });
+    };
 </script>
 
 </body>
