@@ -73,6 +73,7 @@
     var typeSelect = document.getElementById('type');
     var draw; // global so we can remove it later
     function addInteraction() {
+        //объявляем массив координат вершин мультилинии
         var arrCoords = [];
         draw = new ol.interaction.Draw({
             source: source,
@@ -88,7 +89,9 @@
 
                 console.log('modifyend:');
                 console.log(featuresGeoJSON);
-                // console.log(evt.feature.getGeometry().getCoordinates(), evt.feature.getProperties());
+
+                saveModifyCoordLineStr(featuresGeoJSON, nextid);
+                 // console.log(evt.feature.getGeometry().getCoordinates(), evt.feature.getProperties());
                 // console.log(evt.feature.getProperties());
             }, this);
         draw.on('drawend',
@@ -106,8 +109,10 @@
                 console.log(featuresGeoJSON);
                 console.log(evt.feature.getGeometry().getCoordinates(), evt.feature.getProperties());
 
+                //получаем массив координат вершин мультилинии
                 arrCoords = evt.feature.getGeometry().getCoordinates();
-                saveCoordsLineStr(arrCoords, nextid);
+                //сохраняем в базу линию и ее координаты
+                saveDrawCoordsLineStr(arrCoords, nextid);
                 /*arrCoords = evt.feature.getGeometry().getCoordinates();
                 var lengthCoords;
                 //получаем массив координат мультилинии
@@ -124,7 +129,7 @@
     };
     addInteraction();
 
-    var saveCoordsLineStr = function (arrCoords, nextid) {
+    var saveDrawCoordsLineStr = function (arrCoords, nextid) {
         //формируем JSON для отправки на сервер
         //получаем массив координат вершин
         // var arrCoords = evt.feature.getGeometry().getCoordinates();
@@ -160,6 +165,32 @@
                 console.log('Failed add FeatureCoord');
             }
         });
+    };
+
+    var saveModifyCoordLineStr = function (featuresGeoJSON, nextid) {
+        //разбираем GeoJSON
+        var arrData = JSON.parse(featuresGeoJSON);
+        console.log(arrData.type);
+        var arrFeatures = arrData.features;
+        // var objFeature = arrFeatures[0];
+        var objGeometry = arrFeatures[0].geometry;
+        var arrCoords = objGeometry.coordinates;
+        var objProperties = arrFeatures[0].properties;
+
+        console.log('idProperties='+objProperties.id + ', nameProperies='+objProperties.name);
+
+        var arrGeometryCoord = [];
+        for (i in arrCoords) {
+            var vertexCoords = arrCoords[i];
+            var objFeatureLonLat = {
+                'longitude':vertexCoords[0],
+                'latitude':vertexCoords[1],
+                'propertyId':nextid
+            };
+            console.log('longitude='+vertexCoords[0]+', latitude='+vertexCoords[1]);
+            //получили массив координат вершин
+            arrGeometryCoord.push(objFeatureLonLat);
+        }
     };
 </script>
 
