@@ -33,6 +33,20 @@ public class FeatureCoordController {
         return featureCoordService.getFeatureCoordById(Long.parseLong(id));
     }
 
+    @RequestMapping(value = "/get/propertyid/{propertyid}", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    @ResponseBody
+    public List<FeatureCoord> getFeatureCoordByPropertyId(@PathVariable(value = "propertyid") String propertyid){
+        // exception
+        return featureCoordService.getFeatureCoordByPropertyId(propertyid);
+    }
+
+    @RequestMapping(value = "/delete/propertyid/{propertyid}", method = RequestMethod.DELETE, produces = "application/json;charset=utf-8")
+    @ResponseBody
+    public List<FeatureCoord> delFeatureCoordByPropertyId(@PathVariable(value = "propertyid") String propertyid){
+        // exception
+        return featureCoordService.delFeatureCoordByPropertyId(propertyid);
+    }
+
     // localhost:8080/cat/delete?id=5&name=Jack
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE, produces = "application/json;charset=utf-8")
     @ResponseBody

@@ -37,4 +37,19 @@ public class FeatureCoordServiceImpl implements FeatureCoordService{
     public FeatureCoord updFeatureCoord(FeatureCoord featureCoord) {
         return featureCoordDao.update(featureCoord);
     }
+
+    @Override
+    public List<FeatureCoord> getFeatureCoordByPropertyId(String propertyId) {
+        return featureCoordDao.getFeatureCoordByPropertyId(propertyId);
+    }
+
+    @Override
+    public List<FeatureCoord> delFeatureCoordByPropertyId(String propertyId) {
+        return featureCoordDao.delFeatureCoordByPropertyId(propertyId);
+    }
+
+    /*@Override
+    public FeatureCoord delFeatureCoordByPropertyId(String propertyId) {
+        return featureCoordDao.delete(featureCoordDao.getFeatureCoordByPropertyId(propertyId));
+    }*/
 }

@@ -23,8 +23,9 @@
 <button type="button" onclick="SaveModifIntoBase()">Save Modified</button>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
-    var nextid = 1;
-    var JSONmodifyCoord = {};
+    var nextid = 4;             //счетчик уникального ID для карты (propertyId)
+    var JSONmodifyCoord = {};   //обьект FeatureCoord после модификации его пользователем
+    var featurePropertyName = 'volsCable1';
     var raster = new ol.layer.Tile({
         source: new ol.source.OSM()
     });
@@ -100,7 +101,7 @@
             function(evt) {
                 evt.feature.setProperties({
                     'id' : nextid,
-                    'name':'myCable2'
+                    'name':featurePropertyName
                 });
 
                 // console.log(evt.feature);
@@ -150,7 +151,7 @@
         var JSONfeatureCoord = {
             'geometryType':'LineString',
             'propertyId':nextid,
-            'propertyName':'Cable1',
+            'propertyName':featurePropertyName,
             'geometryCoord':arrGeometryCoord
         };
         $.ajax({
@@ -187,7 +188,7 @@
             var objFeatureLonLat = {
                 'longitude':vertexCoords[0],
                 'latitude':vertexCoords[1],
-                'propertyId':nextid
+                'propertyId':objProperties.id
             };
             console.log('longitude='+vertexCoords[0]+', latitude='+vertexCoords[1]);
             //получили массив координат вершин
@@ -195,14 +196,34 @@
         }
         JSONmodifyCoord = {
             'geometryType':'LineString',
-            'propertyId':nextid,
-            'propertyName':'Cable1',
+            'propertyId':objProperties.id,
+            'propertyName':featurePropertyName,
             'geometryCoord':arrGeometryCoord
         };
     };
 
     var SaveModifIntoBase = function () {
       //здесь будем удалять из базы старую мультилинию с nextid и добавлять вместо нее модифицированную
+        console.log('propertyId='+JSONmodifyCoord.propertyId + ', propertyName' + JSONmodifyCoord.propertyName);
+        //получаем ID FeatureCoord
+        var idFeatureCoord;
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:8080/featurecoord/get/propertyid/' + JSONmodifyCoord.propertyId,
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                var stringData = JSON.stringify(result);
+                console.log(stringData);
+                var arrData = JSON.parse(stringData);
+                idFeatureCoord = arrData[0].id;
+                console.log('idFeatureCoord='+idFeatureCoord);
+                //здесь будем удалять FeatureCoord по ID и добавлять модифицированный FeatureCoord
+            },
+            error: function (jqXHR, testStatus, errorThrown) {
+                console.log('error getting featurecoord by propertyId')
+            }
+        });
     };
 </script>
 
