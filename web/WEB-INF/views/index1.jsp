@@ -20,9 +20,11 @@
         <option value="Circle">Circle</option>
     </select>
 </form>
+<button type="button" onclick="SaveModifIntoBase()">Save Modified</button>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
     var nextid = 1;
+    var JSONmodifyCoord = {};
     var raster = new ol.layer.Tile({
         source: new ol.source.OSM()
     });
@@ -177,7 +179,7 @@
         var arrCoords = objGeometry.coordinates;
         var objProperties = arrFeatures[0].properties;
 
-        console.log('idProperties='+objProperties.id + ', nameProperies='+objProperties.name);
+        console.log('idProperties='+objProperties.id + ', nameProperties='+objProperties.name);
 
         var arrGeometryCoord = [];
         for (i in arrCoords) {
@@ -191,6 +193,16 @@
             //получили массив координат вершин
             arrGeometryCoord.push(objFeatureLonLat);
         }
+        JSONmodifyCoord = {
+            'geometryType':'LineString',
+            'propertyId':nextid,
+            'propertyName':'Cable1',
+            'geometryCoord':arrGeometryCoord
+        };
+    };
+
+    var SaveModifIntoBase = function () {
+      //здесь будем удалять из базы старую мультилинию с nextid и добавлять вместо нее модифицированную
     };
 </script>
 
