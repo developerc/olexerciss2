@@ -218,10 +218,46 @@
                 var arrData = JSON.parse(stringData);
                 idFeatureCoord = arrData[0].id;
                 console.log('idFeatureCoord='+idFeatureCoord);
+                //нашли ID FeatureCoord
                 //здесь будем удалять FeatureCoord по ID и добавлять модифицированный FeatureCoord
+                DelFeatureCoordById(idFeatureCoord);
+
             },
             error: function (jqXHR, testStatus, errorThrown) {
                 console.log('error getting featurecoord by propertyId')
+            }
+        });
+    };
+
+    var DelFeatureCoordById = function (idFeatureCoord) {
+        $.ajax({
+            type: 'DELETE',
+            url: 'http://localhost:8080/featurecoord/delete?id=' + idFeatureCoord,
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                console.log('success deleting featurecoord by Id');
+                AddModifiedFeature(JSONmodifyCoord);
+            },
+            error: function (jqXHR, testStatus, errorThrown) {
+                console.log('error deleting featurecoord by Id')
+            }
+        });
+    };
+
+    var AddModifiedFeature = function (JSONmodifyCoord) {
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8080/featurecoord/add',
+            contentType: 'application/json;charset=utf-8',
+            data: JSON.stringify(JSONmodifyCoord),
+            dataType: 'json',
+            async: false,
+            success: function (result) {
+                console.log('success add modified featurecoord');
+            },
+            error: function (jqXHR, testStatus, errorThrown) {
+                console.log('error add modified featurecoord');
             }
         });
     };
