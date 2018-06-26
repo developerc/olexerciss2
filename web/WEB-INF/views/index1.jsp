@@ -26,7 +26,7 @@
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
-    var nextid = 6;             //счетчик уникального ID для карты (propertyId)
+    var nextid = 7;             //счетчик уникального ID для карты (propertyId)
     var JSONmodifyCoord = {};   //обьект FeatureCoord после модификации его пользователем
     var featurePropertyName = 'volsCable1';
     var raster = new ol.layer.Tile({
