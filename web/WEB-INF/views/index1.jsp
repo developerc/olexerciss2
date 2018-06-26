@@ -19,11 +19,14 @@
         <option value="Polygon">Polygon</option>
         <option value="Circle">Circle</option>
     </select>
+
+    <button type="button" onclick="SaveModifIntoBase()">Save Modified</button>
+    <button type="button" onclick="AddLineStringFromBase()">Add LineString</button>
 </form>
-<button type="button" onclick="SaveModifIntoBase()">Save Modified</button>
+
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
-    var nextid = 4;             //счетчик уникального ID для карты (propertyId)
+    var nextid = 6;             //счетчик уникального ID для карты (propertyId)
     var JSONmodifyCoord = {};   //обьект FeatureCoord после модификации его пользователем
     var featurePropertyName = 'volsCable1';
     var raster = new ol.layer.Tile({
@@ -49,17 +52,25 @@
             })
         })
     });
+
+    var vectorSource = new ol.source.Vector({});
+
     //--добавим слой с готовыми линиями
-    var geojsonObject = {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"LineString","coordinates":[[4466646.416733378,5756930.625162051],[4466801.679447082,5757077.527575786]]},"properties":{"id":1,"name":"myCable1"}}]};
+    /*var geojsonObject = {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"LineString","coordinates":[[4466646.416733378,5756930.625162051],[4466801.679447082,5757077.527575786]]},"properties":{"id":1,"name":"myCable1"}}]};
     var source2 = new ol.source.Vector({
         features: (new ol.format.GeoJSON()).readFeatures(geojsonObject)
     });
     var layer2 = new ol.layer.Vector({
         source: source2
-    });
+    });*/
     //добавим слой при загрузке. Редактировать его нельзя
     var map = new ol.Map({
-        layers: [raster, layer2, vector],
+        //layers: [raster, layer2, vector],
+        layers: [raster,
+            new ol.layer.Vector({
+                source: vectorSource
+            }),
+            vector],
         target: 'map',
         /*view: new ol.View({
             center: [-11000000, 4600000],
@@ -93,7 +104,7 @@
                 console.log('modifyend:');
                 console.log(featuresGeoJSON);
 
-                saveModifyCoordLineStr(featuresGeoJSON, nextid);
+                saveModifyCoordLineStr(featuresGeoJSON);
                  // console.log(evt.feature.getGeometry().getCoordinates(), evt.feature.getProperties());
                 // console.log(evt.feature.getProperties());
             }, this);
@@ -170,7 +181,7 @@
         });
     };
 
-    var saveModifyCoordLineStr = function (featuresGeoJSON, nextid) {
+    var saveModifyCoordLineStr = function (featuresGeoJSON) {
         //разбираем GeoJSON
         var arrData = JSON.parse(featuresGeoJSON);
         console.log(arrData.type);
@@ -260,6 +271,79 @@
                 console.log('error add modified featurecoord');
             }
         });
+    };
+
+    //при нажатии на кнопку отображаем на карте все линии из базы
+    var AddLineStringFromBase = function () {
+      console.log('AddLineStringFromBase');
+      $.ajax({
+          type: 'GET',
+          url: 'http://localhost:8080/featurecoord/all',
+          dataType: 'json',
+          async: false,
+          success: function (result) {
+              var stringData = JSON.stringify(result);
+              //console.log(stringData);
+              var arrData = JSON.parse(stringData);
+              for (i in arrData) {
+                  console.log('next feature:');
+                  console.log(arrData[i]);
+                  var objFeature = arrData[i];
+                  var arrGeometryCoord = objFeature.geometryCoord;
+                  var arrLineCoord = [];
+                  for (k in arrGeometryCoord){
+                      var arrPointCoord = [];
+                      var objGeomCoordItem = arrGeometryCoord[k];
+                      arrPointCoord[0] = objGeomCoordItem.longitude;
+                      arrPointCoord[1] = objGeomCoordItem.latitude;
+                      arrLineCoord.push(arrPointCoord);
+                    console.log('lon=' + objGeomCoordItem.longitude + ', lat=' + objGeomCoordItem.latitude);
+                  }
+                  var linestring_feature = new ol.Feature({
+                      geometry: new ol.geom.LineString(
+                          arrLineCoord
+                      )
+                  });
+                  vectorSource.addFeature( linestring_feature );
+              }
+          },
+          error: function (jqXHR, testStatus, errorThrown) {
+              console.log('error getting featurecoord');
+          }
+      });
+
+      /*var arrStringCoords = [[4463583.262541277,5756721.0204985505],[4469306.48503413,5756931.222326335]];
+      var linestring_feature = new ol.Feature({
+          geometry: new ol.geom.LineString(
+              // [[4463583.262541277,5756721.0204985505],[4469306.48503413,5756931.222326335]]
+              arrStringCoords
+          )
+      });
+        vectorSource.addFeature( linestring_feature );*/
+        /*var myLinestr = new ol.geom.LineString();
+        myLinestr.appendCoordinate(4463583.262541277,5756721.0204985505);
+        myLinestr.appendCoordinate(4469306.48503413,5756931.222326335);
+        vectorSource.addFeature( myLinestr );*/
+        /*var linestring_feature = new ol.Feature({
+            geometry: new ol.geom.LineString(
+                [[4466646.416733378,5756930.625162051],[4466801.679447082,5757077.527575786]]
+            )
+        });
+        vectorSource.addFeature( linestring_feature );
+        linestring_feature = new ol.Feature({
+            geometry: new ol.geom.LineString(
+                [[4463583.262541277,5756721.0204985505],[4469306.48503413,5756931.222326335]]
+            )
+        });
+        vectorSource.addFeature( linestring_feature );*/
+        // var geojsonObject = {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"LineString","coordinates":[[4466646.416733378,5756930.625162051],[4466801.679447082,5757077.527575786]]},"properties":{"id":1,"name":"myCable1"}}]};
+        // vectorSource.addFeature((new ol.format.GeoJSON()).readFeatures(geojsonObject));
+        /*var source2 = new ol.source.Vector({
+            features: (new ol.format.GeoJSON()).readFeatures(geojsonObject)
+        });
+        var layer2 = new ol.layer.Vector({
+            source: source2
+        });*/
     };
 </script>
 
